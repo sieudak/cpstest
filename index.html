@@ -30,7 +30,7 @@
         }
         #clickButton {
             font-size: 24px;
-            padding: 20px 80px;
+            padding: 40px 100px;
             cursor: pointer;
             font-family: 'Space Mono', monospace;
             background-color: #6c5ce7;
@@ -48,14 +48,37 @@
             transform: scale(0.95);
         }
         .counter {
-            background-color: white;
-            padding: 10px 20px;
-            border-radius: 8px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            margin-top: 10px;
-            color: #1d0451;
-            transition: transform 0.2s ease, box-shadow 0.3s ease;
-        }
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    background-color: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    margin-top: 20px;
+    color: #1d0451;
+    transition: transform 0.2s ease, box-shadow 0.3s ease;
+}
+
+.frame {
+    text-align: center;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    background-color: #f4f4f9;
+    flex: 1;
+    margin: 0 10px;
+    max-width: 150px; /* Ensure all frames have the same width */
+}
+
+.frame span {
+    display: block;
+    margin-bottom: 10px;
+    font-weight: bold;
+    color: #1d0451;
+}
+
+
         .counter:hover {
             transform: scale(1.05);
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
@@ -160,16 +183,40 @@
         .duration-container button {
             margin: 5px;
         }
+
+.frame:hover {
+    transform: scale(1.05);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.frame span {
+    display: block;
+}
     </style>
 </head>
 <body>
     <h1 id="title">10 Seconds Clicks Per Second Test</h1>
+    <img src="Ct.png" width="120"height="120" style="color: rgb(10, 141, 255);">
+    <p style="color: rgb(199, 199, 199);">If the the button/text disappear zoom out using: Ctrl + Scrollwheel</p>
+    <div class="counter">
+        <div class="frame">
+            <span>Clicks:</span> 
+            <span id="count">0</span>
+        </div>
+        <div class="frame">
+            <span>CPS:</span> 
+            <span id="cps-count">0</span>
+        </div>
+        <div class="frame">
+            <span>Time:</span> 
+            <span id="Current-time">0</span>
+        </div>
+    </div>
+      
     <div id="clickArea">
         <button id="clickButton" onclick="handleClick()">Click Me!</button>
     </div>
-    <div class="counter">Clicks: <span id="count">0</span></div>
-    <div class="counter">CPS: <span id="cps-count">0</span></div>
-    <div class="counter">Last Record: <span id="LastRecord">0</span></div>
+    <br>
     <button class="retry-button" onclick="reset()" id="button-6">
         <span id="spin"></span>
         <a>Retry</a>
@@ -211,69 +258,95 @@
             </div>
         </h2>
     </div>
+
+    <div style="font-size: 45px;">
+        <span>🏆Best Record: </span>
+        <span id="BestRecord">0 🏆</span>
+    </div>
+    <div style="font-size: 45px;">
+        <span>🥇Last Record: </span>
+        <span id="LastRecord">0 🥇</span>
+    </div>
+
     <script>
-        let TEST_DURATION = 10; // duration of the test in seconds
-        let clicks = 0;
-        let startTime;
-        let timerId;
-        document.getElementById('title').innerText = `${TEST_DURATION} Seconds Clicks Per Second Test`;
-        let LastRecord = 0;
+let TEST_DURATION = 10; // duration of the test in seconds
+let clicks = 0;
+let startTime;
+let timerId;
+document.getElementById('title').innerText = `${TEST_DURATION} Seconds Clicks Per Second Test`;
+let LastRecord = 0;
+let BestRecord = 0;
+let isRunning = false;
 
-        function handleClick() {
-            if (!startTime) {
-                startTime = new Date().getTime();
-                timerId = setInterval(updateTimer, 1000);
-            }
-            clicks++;
-            document.getElementById('count').innerText = clicks;
-            document.getElementById('cps-count').innerText = (clicks / ((new Date().getTime() - startTime) / 1000)).toFixed(2);
-        }
+document.getElementById('click-area').addEventListener('click', handleClick);
 
-        function updateTimer() {
-            const elapsedTime = Math.floor((new Date().getTime() - startTime) / 1000);
-            if (elapsedTime >= TEST_DURATION) {
-                showCPS();
-            }
-        }
+function handleClick() {
+    if (!isRunning) {
+        startTime = new Date().getTime();
+        isRunning = true;
+        requestAnimationFrame(update);
+    }
+    clicks++;
+    document.getElementById('count').innerText = clicks;
+}
 
-        function showCPS() {
-            clearInterval(timerId);
-            const cps = clicks / TEST_DURATION;
-            let text;
-            if (cps <= 4.5) {
-                text = "You Absolutely suck!";
-            } else if (cps >= 9) {
-                text = "Fuiyo! Very Good!";
-            } else {
-                text = "Not Bad!";
-            }
-            if (cps < 0.9) {
-                text = "You didn't even try!";
-            }
-            document.getElementById('cpsResult').innerText = `Your CPS: ${cps.toFixed(2)} - ${text}`;
-            document.getElementById('cpsModal').style.display = 'flex';
-            LastRecord = cps.toFixed(2);
-            document.getElementById('LastRecord').innerText = LastRecord;
-            reset();
-        }
+function update() {
+    const currentTime = new Date().getTime();
+    const elapsedTime = (currentTime - startTime) / 1000;
 
-        function closeModal() {
-            document.getElementById('cpsModal').style.display = 'none';
-        }
+    document.getElementById('cps-count').innerText = (clicks / elapsedTime).toFixed(2);
+    document.getElementById('Current-time').innerText = elapsedTime.toFixed(2);
 
-        function reset() {
-            clicks = 0;
-            startTime = null;
-            clearInterval(timerId);
-            document.getElementById('count').innerText = clicks;
-            document.getElementById('cps-count').innerText = (clicks / TEST_DURATION).toFixed(2);
-        }
+    if (elapsedTime >= TEST_DURATION) {
+        showCPS();
+    } else {
+        requestAnimationFrame(update);
+    }
+}
 
-        function setDuration(seconds) {
-            TEST_DURATION = seconds;
-            document.getElementById('title').innerText = `${TEST_DURATION} Seconds Clicks Per Second Test`;
-            reset();
-        }
+function showCPS() {
+    isRunning = false;
+    const cps = clicks / TEST_DURATION;
+    let text;
+    if (cps <= 4.5) {
+        text = "You Absolutely suck!";
+    } else if (cps >= 9) {
+        text = "Fuiyo! Very Good!";
+    } else {
+        text = "Not Bad!";
+    }
+    if (cps < 0.9) {
+        text = "You didn't even try!";
+    }
+    document.getElementById('cpsResult').innerText = `Your CPS: ${cps.toFixed(2)} - ${text}`;
+    document.getElementById('cpsModal').style.display = 'flex';
+    LastRecord = cps.toFixed(2);
+    document.getElementById('LastRecord').innerText = LastRecord;
+
+    if (cps > BestRecord) {
+        BestRecord = cps;
+        document.getElementById('BestRecord').innerText = BestRecord.toFixed(2);
+    }
+}
+function closeModal() {
+    document.getElementById('cpsModal').style.display = 'none';
+    reset();
+}
+
+function reset() {
+    clicks = 0;
+    startTime = null;
+    isRunning = false;
+    document.getElementById('count').innerText = clicks;
+    document.getElementById('cps-count').innerText = (clicks / TEST_DURATION).toFixed(2);
+    document.getElementById('Current-time').innerText = '0.00';
+}
+
+function setDuration(seconds) {
+    TEST_DURATION = seconds;
+    document.getElementById('title').innerText = `${TEST_DURATION} Seconds Clicks Per Second Test`;
+    reset();
+}
     </script>
 </body>
 </html>
